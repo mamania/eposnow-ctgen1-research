@@ -2,6 +2,44 @@
 
 Community reverse-engineering and recovery research for the **Epos Now Countertop Gen1 (CTGEN1)** based on **SUNMI T2s L1561 / Qualcomm SDM660** hardware.
 
+## Current status
+
+The device is **not hard-bricked**: stock recovery and fastboot are still reachable, but normal Android boot currently loops at the SUNMI logo.
+
+What we know now:
+
+- the bootloader is locked and secure boot is enabled;
+- slot B was intentionally modified only at `system_b` and `vbmeta_b`;
+- slot A later started bootlooping even though its main slot-specific partitions were never intentionally written;
+- a stock-recovery factory reset did not fix slot A;
+- before the experiments `ro.boot.veritymode=enforcing` was observed;
+- stock recovery on **both A and B now reports `ro.boot.veritymode=logging`** while still reporting `ro.boot.verifiedbootstate=green` and `ro.boot.flash.locked=1`;
+- the standard FRP/PersistentDataBlock OEM-unlock byte was successfully changed and `fastboot flashing get_unlock_ability` changed from `0` to `1`;
+- the normal fastboot unlock confirmation path is broken/disabled on this device;
+- a matching signed SDM660 Firehose programmer has not yet been found.
+
+The leading research area is now **shared VerifiedBoot / DeviceInfo state**, especially the 4 KiB `devinfo` partition and any related persistent or RPMB-backed state.
+
+## Help wanted
+
+If you have worked on **Epos Now CTGEN1**, **SUNMI T2s L1561**, Qualcomm SDM660 POS hardware, SUNMI service firmware, or EDL/Firehose tooling, contributions are very welcome.
+
+The most valuable items right now are:
+
+1. a stock **Epos Now CTGEN1** firmware package or read-only dump;
+2. a stock **SUNMI T2s L1561** firmware package or read-only dump;
+3. a signed Qualcomm Firehose programmer matching:
+
+```text
+HWID:    0008c0e100000000
+PK_HASH: 3720a9d9e03543ae4ad244d93d4b56ef588a499106c7d1f931f42704173a3414
+```
+
+4. a working-device dump of `devinfo`, `misc`, `frp`, `persist`, `sunmi`, `abl_a`, `boot_a`, `vendor_a` or `vbmeta_a`;
+5. confirmed T2s L1561 EDL/test-point information or service documentation.
+
+Please open an issue if you have any of these. Even a small read-only dump or a confirmed technical observation can help.
+
 ## Goals
 
 - Recover a CTGEN1 that now bootloops after controlled slot-B experiments.
